@@ -1,0 +1,163 @@
+class Model:
+    def __init__(self) -> dict:
+        self.elements = []
+    
+    def __len__(self): 
+        return len(self.elements)
+        
+    def append(self, desc: str, status: bool):
+        self.desc = desc
+        self.status = status
+        self.count = len(self.elements) + 1
+        task = f"{self.count}. {self.desc}"
+        return self.elements.append({task : self.status})
+    
+    def remove(self, task: int):
+            return self.elements.remove(self.elements[task - 1])
+        
+    def get_task(self):
+        return self.elements
+    
+    def complete(self, index: int):
+        task = self.elements[index - 1]
+        for item in task:
+            task[item] = True
+        return self.elements
+            
+    def incomplete(self, index: int,):
+        task = self.elements[index - 1]
+        for item in task:
+            task[item] = False
+        return self.elements
+    
+
+class View:
+    def __init__(self, controller: Controller):
+       self.controller  = controller 
+        
+    def actions(self):
+        print("\n--- To-Do List Menu ---\n",
+              "1. Add Task\n",
+              "2. View Tasks\n",
+              "3. Mark Task as Complete\n",
+              "4. Mark Task as Incomplete\n",
+              "5. Remove Task\n",
+              "6. Exit\n")
+    
+        while True:
+            try:
+                user = int(input("What would you like to do (Select Number for task): "))
+                if 1 <= user <= 6:
+                    return user
+                else: 
+                    print("\nPlease Choose a value between 1 - 6!")
+            except ValueError:
+                    print("\nPlease Choose a value between 1 - 6!")
+                
+    def add_task(self):
+        task = input("What is your task: ")
+        status = (input("What is the status (True or False): ")).lower()
+        while status not in("true", "false"):
+            print("\nInvalid input. Please enter True or False!")
+            status = (input("What is the status (True or False): ")).lower()
+        status = True if status == "true" else False
+        print("\nTask added Successfully.")
+        return self.controller.add_menu(task, status)
+    
+    def task_action(self, desc: str, func: function):
+        while True:
+            try:
+                index = int(input(f"\nWhich task {desc} - \n"
+                                "(Select task number): "))
+        
+                if len(self.controller.list())  >= index:
+                    func(index)
+                    break
+                else: 
+                    print("\nInvalid Index: Please choose a task from the list!")
+            except ValueError:
+                print("\nInvalid Index: Please choose a task from the list!")
+    
+    def view_list(self):
+        print(f"{"-" * 8}Task{"-" * 8}")
+        return f"{self.controller.ref_list()}\n"
+                    
+    def complete(self):
+        self.view_list()
+        return self.controller.complete_menu()
+    
+    def incomplete(self):
+        self.view_list()
+        return self.controller.incomplete_menu()
+        
+    def remove(self):
+        self.view_list()
+        return self.controller.remove_menu()
+   
+class Controller:
+    def __init__(self, model : Model, view : View):
+        self.model = model
+        self.view = view
+
+    def select_menu(self):
+        select = self.view.actions()
+        if select == 1:
+            return self.view.add_task()
+        elif select == 2:
+            return self.view.view_list()
+        elif select == 3:
+            return self.view.complete()
+        elif select == 4:
+            return self.view.incomplete()
+        elif select == 5:
+            return self.view.remove()
+        elif select == 6:
+            exit()
+        else:
+            self.view.actions()
+            
+    def list(self):
+        return self.model.get_task()
+    
+    def ref_list(self):
+        task = self.model.get_task()
+        
+        if len(task) == 0:
+            print("Your list is empty!\n")
+        else:
+            for item in task:
+                for desc in item.keys():
+                    print(f"{desc:<15} : {item[desc]}")
+    
+    def add_menu(self, task, status):
+        self.model.append(task, status)
+        
+        
+    def remove_menu(self):
+            return self.view.task_action("would you like to remove", self.model.remove)
+    
+    def incomplete_menu(self):
+        if len(self.model) == 0:
+            self.ref_list()
+            self.view.actions()
+        return self.view.task_action("is incomplete", self.model.incomplete)
+    
+    def complete_menu(self):
+        if len(self.model) == 0:
+            self.ref_list()
+            self.view.actions()
+        return self.view.task_action("is complete", self.model.complete)
+    
+    
+if __name__ == "__main__":
+    from model import Model
+    from controller import Controller
+    from view import View
+    
+    model = Model()
+    controller = Controller(model, None)
+    view = View(controller)
+    controller.view = view
+    
+    while True:
+        controller.select_menu()
