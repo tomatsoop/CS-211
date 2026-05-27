@@ -1,3 +1,3 @@
-# CS-2 1 1 
-CS 2 1 1 Spring 2025 w Juan 
+# CS-211 
+CS 211 Spring 2025 
 Python class and OOP programming
